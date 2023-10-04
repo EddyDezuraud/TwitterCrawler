@@ -33,8 +33,7 @@ app.get('/checkTwitterId/:userId', async (req, res) => {
         res.status(200).json({name, img});
 
     } catch (error) {
-        console.error(`Erreur : ${error.message}`);
-        res.status(500).json({ error: 'Une erreur s\'est produite lors de la vérification de l\'identifiant Twitter.' });
+        res.status(500).json({ error: error.message });
     }
 
 
