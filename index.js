@@ -1,6 +1,9 @@
 import express from 'express';
-import puppeteer from 'puppeteer-core';
-import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer-core'
+import edgeChromium from 'chrome-aws-lambda'
+
+const LOCAL_CHROME_EXECUTABLE = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+
 
 
 const app = express();
@@ -17,16 +20,16 @@ app.use((req, res, next) => {
 app.get('/checkTwitterId/:userId', async (req, res) => {
     const userId = req.params.userId;
     let browser = null;
+    const executablePath = await edgeChromium.executablePath || LOCAL_CHROME_EXECUTABLE
+
     try {
         // const browser = await puppeteer.launch();
 
         browser = await puppeteer.launch({
-            args: [
-                ...chromium.args,
-            ],
-            executablePath: await chromium.executablePath,
-            headless: true,
-        });
+            executablePath,
+            args: edgeChromium.args,
+            headless: false,
+        })
 
         const page = await browser.newPage();
 
