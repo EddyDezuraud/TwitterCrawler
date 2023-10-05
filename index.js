@@ -1,9 +1,6 @@
 import express from 'express';
 import puppeteer from 'puppeteer-core'
-import edgeChromium from 'chrome-aws-lambda'
-
-const LOCAL_CHROME_EXECUTABLE = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-
+import chromium from 'chrome-aws-lambda'
 
 
 const app = express();
@@ -19,14 +16,18 @@ app.use((req, res, next) => {
 
 app.get('/checkTwitterId/:userId', async (req, res) => {
     const userId = req.params.userId;
-    try {
-        const executablePath = await edgeChromium.executablePath || LOCAL_CHROME_EXECUTABLE
+    let browser = null;
 
-        const browser = await puppeteer.launch({
-            executablePath,
-            args: edgeChromium.args,
-            headless: false,
-        })
+    try {
+
+        browser = await puppeteer.launch({
+            args: [
+              ...chromium.args,
+              // Add any additional args here if needed
+            ],
+            executablePath: await chromium.executablePath,
+            headless: true,
+          });
 
 
         // const browser = await puppeteer.launch();
@@ -44,12 +45,13 @@ app.get('/checkTwitterId/:userId', async (req, res) => {
         const name = userProfileJson.author.givenName;
         const img = userProfileJson.author.image.thumbnailUrl;
 
-        await browser.close();
 
         res.status(200).json({ name, img });
 
     } catch (error) {
         res.status(500).json({ error: error.message });
+    } finally {
+        await browser.close();
     }
 
 
