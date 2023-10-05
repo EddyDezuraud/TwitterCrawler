@@ -1,5 +1,6 @@
 import express from 'express';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from 'chrome-aws-lambda';
 
 
 const app = express();
@@ -11,12 +12,22 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
-  });
+});
 
 app.get('/checkTwitterId/:userId', async (req, res) => {
     const userId = req.params.userId;
+    let browser = null;
     try {
-        const browser = await puppeteer.launch();
+        // const browser = await puppeteer.launch();
+
+        browser = await puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath,
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+        });
+
         const page = await browser.newPage();
 
         await page.setUserAgent(
@@ -36,12 +47,12 @@ app.get('/checkTwitterId/:userId', async (req, res) => {
         const name = userProfileJson.author.givenName;
         const img = userProfileJson.author.image.thumbnailUrl;
 
-        await browser.close();
-
-        res.status(200).json({name, img});
+        res.status(200).json({ name, img });
 
     } catch (error) {
         res.status(500).json({ error: error.message });
+    } finally {
+        await browser.close();
     }
 
 
