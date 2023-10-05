@@ -21,11 +21,11 @@ app.get('/checkTwitterId/:userId', async (req, res) => {
         // const browser = await puppeteer.launch();
 
         browser = await puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
+            args: [
+                ...chromium.args,
+            ],
             executablePath: await chromium.executablePath,
-            headless: chromium.headless,
-            ignoreHTTPSErrors: true,
+            headless: true,
         });
 
         const page = await browser.newPage();
