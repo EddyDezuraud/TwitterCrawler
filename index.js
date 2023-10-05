@@ -1,10 +1,5 @@
 import express from 'express';
-import puppeteer from 'puppeteer-core'
-import edgeChromium from 'chrome-aws-lambda'
-
-const LOCAL_CHROME_EXECUTABLE = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-
-
+import chromium  from 'chrome-aws-lambda'
 
 const app = express();
 const port = 3000;
@@ -25,18 +20,15 @@ app.get('/checkTwitterId/:userId', async (req, res) => {
     try {
         // const browser = await puppeteer.launch();
 
-        browser = await puppeteer.launch({
-            executablePath,
-            args: edgeChromium.args,
-            headless: false,
+        browser = await chromium.puppeteer.launch({
+            args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
         })
 
         const page = await browser.newPage();
-
-        await page.setUserAgent(
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"
-        )
-
 
         await page.goto('https://twitter.com/' + userId);
 
