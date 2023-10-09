@@ -1,10 +1,10 @@
 import express from 'express';
-import chromium  from 'chrome-aws-lambda'
+import chromium from 'chrome-aws-lambda';
 
 const app = express();
 const port = 3000;
 
-app.use((req, res, next) => {
+app.use((res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     // res.header('Access-Control-Allow-Origin', 'https://www.xpostpreview.com/');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -15,18 +15,15 @@ app.use((req, res, next) => {
 app.get('/checkTwitterId/:userId', async (req, res) => {
     const userId = req.params.userId;
     let browser = null;
-    const executablePath = await edgeChromium.executablePath || LOCAL_CHROME_EXECUTABLE
 
     try {
-        // const browser = await puppeteer.launch();
-
         browser = await chromium.puppeteer.launch({
             args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
-        })
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath,
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+        });
 
         const page = await browser.newPage();
 
@@ -47,10 +44,10 @@ app.get('/checkTwitterId/:userId', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     } finally {
-        await browser.close();
+        if (browser) {
+            await browser.close();
+        }
     }
-
-
 });
 
 app.listen(port, () => {
